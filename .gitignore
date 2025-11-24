@@ -1,0 +1,5 @@
+.env
+.DS_Store
+mosquitto.db
+mosquitto.log
+actions-runner
