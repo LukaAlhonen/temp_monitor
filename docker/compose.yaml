@@ -1,4 +1,19 @@
 services:
+  db:
+    container_name: influx_db
+    image: influxdb:3-core
+    ports:
+      - 8181:8181
+    command:
+      - influxdb3
+      - serve
+      - --node-id=node0
+      - --object-store=file
+      - --data-dir=/var/lib/influxdb3/data
+      - --plugin-dir=/var/lib/influxdb3/plugins
+    volumes:
+      - temperature-data:/var/lib/influxdb3/data
+    user: "0"
   mosquitto_broker:
     container_name: mosquitto-broker
     image: eclipse-mosquitto
@@ -8,3 +23,5 @@ services:
       - $PWD/mosquitto/config:/mosquitto/config
       - $PWD/mosquitto/log/:/mosquitto/log
       - $PWD/mosquitto/data:/mosquitto/data
+volumes:
+  temperature-data:
