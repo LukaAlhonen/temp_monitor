@@ -14,6 +14,18 @@ services:
     volumes:
       - temperature-data:/var/lib/influxdb3/data
     user: "0"
+  test_db:
+    container_name: influx_db_test
+    image: influxdb:3-core
+    ports:
+      - 8182:8181
+    command:
+      - influxdb3
+      - serve
+      - --node-id=node1
+      - --object-store=memory
+      - --without-auth
+    user: "0"
   mosquitto_broker:
     container_name: mosquitto-broker
     image: eclipse-mosquitto

@@ -10,11 +10,17 @@ use uuid::Uuid;
 pub struct Publisher {
     client: AsyncClient,
     sensor: Sensor,
-    location: String,
+    location_id: String,
+    sensor_id: String,
 }
 
 impl Publisher {
-    pub fn new(broker_address: String, broker_port: u16, location: String) -> Self {
+    pub fn new(
+        broker_address: String,
+        broker_port: u16,
+        location_id: String,
+        sensor_id: String,
+    ) -> Self {
         let name = format!("pub:{}", Uuid::new_v4());
         let mut mqttoptions = MqttOptions::new(name, broker_address, broker_port);
         mqttoptions.set_keep_alive(Duration::from_secs(5));
@@ -37,7 +43,8 @@ impl Publisher {
         Publisher {
             client: client,
             sensor,
-            location,
+            location_id,
+            sensor_id,
         }
     }
 
@@ -49,15 +56,11 @@ impl Publisher {
     }
 
     // start publishing loop
-    pub async fn run(&self, topic: &str) {
+    pub async fn run(&mut self, topic: &str) {
         loop {
-            let data = self.sensor.read();
-            let measurement: TemperatureMeasurement = TemperatureMeasurement::new(
-                data,
-                "Celsius",
-                &self.sensor.get_id_string(),
-                &self.location,
-            );
+            let temp = self.sensor.read();
+            let measurement: TemperatureMeasurement =
+                TemperatureMeasurement::new(temp, "Celsius", &self.sensor_id, &self.location_id);
 
             match measurement.into_payload() {
                 Ok(payload) => match &self.publish(topic, payload).await {

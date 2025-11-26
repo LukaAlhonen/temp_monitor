@@ -18,14 +18,16 @@ async fn main() {
         env::var("MQTT_BROKER_ADDRESS").expect("MQTT_BROKER_ADDRESS must be set");
     let mqtt_broker_port = env::var("MQTT_BROKER_PORT").expect("MQTT_BROKER_PORT must be set");
     let mqtt_topic = env::var("MQTT_TOPIC").expect("MQTT_TOPIC must be set");
-    let location = env::var("LOCATION").expect("LOCATION must be set");
+    let location_id = env::var("LOCATION_ID").expect("LOCATION_ID must be set");
+    let sensor_id = env::var("SENSOR_ID").expect("SENSOR_ID must be set");
 
-    let publisher = Publisher::new(
+    let mut publisher = Publisher::new(
         mqtt_broker_address,
         mqtt_broker_port
             .parse()
             .expect("failed to parse mqtt_broker_port"),
-        location,
+        location_id,
+        sensor_id,
     );
 
     // start publisher

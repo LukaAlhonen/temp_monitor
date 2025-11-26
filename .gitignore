@@ -3,3 +3,5 @@
 mosquitto.db
 mosquitto.log
 actions-runner
+node_modules/
+dist/
