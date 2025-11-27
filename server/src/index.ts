@@ -12,6 +12,7 @@ import { WebSocketServer } from "ws";
 import { useServer } from "graphql-ws/use/ws";
 import { Cache } from "./services/cache.js";
 import { MqttListener } from "./listeners/mqttListener.js";
+import { pubsub } from "./pubsub.js";
 import type { Disposable } from "graphql-ws";
 
 let wsCleanup: Disposable;
@@ -24,13 +25,15 @@ const startApolloServer = async () => {
     logger: true,
   });
 
+  const logger = fastify.log;
+
   const apolloServer = new ApolloServer<MyContext>({
     schema,
   });
 
   await apolloServer.start();
 
-  const cache = new Cache();
+  const cache = new Cache({ bufSize: 100 });
   influxdbClient = new InfluxDBClient({
     host: config.INFLUX_HOST,
     database: config.INFLUX_DATABASE,
@@ -40,6 +43,7 @@ const startApolloServer = async () => {
     influxdbClient,
     cache,
     table: "temp_readings",
+    logger,
   });
 
   // load sensor and location objects from influxdb into cache
@@ -81,6 +85,7 @@ const startApolloServer = async () => {
       url: "mqtt://localhost:1883",
       topic: "sensors/temp",
       influxdb3service: services.influxdb3service,
+      pubsub,
     });
 
     mqttListener

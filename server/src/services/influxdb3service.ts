@@ -10,23 +10,30 @@ import {
   parseRawSensor,
 } from "../utils/parser.js";
 import type { Cache } from "./cache.js";
+import { CacheError } from "../types/cacheError.js";
+import type { FastifyBaseLogger } from "fastify";
 
 export class InfluxDB3Service {
   private client: InfluxDBClient;
   private cache: Cache;
   private table: string;
+  private logger: FastifyBaseLogger | undefined;
+
   constructor({
     client,
     cache,
     table,
+    logger,
   }: {
     client: InfluxDBClient;
     cache: Cache;
     table: string;
+    logger?: FastifyBaseLogger;
   }) {
     this.client = client;
     this.cache = cache;
     this.table = table;
+    this.logger = logger;
   }
 
   // get specific measurement object by id
@@ -170,6 +177,7 @@ export class InfluxDB3Service {
 
   // write a new measurement to db
   async writeMeasurement({ measurement }: { measurement: MeasurementModel }) {
+    // cache location and sensor if not already done
     if (!this.cache.getLocation({ id: measurement.locationId }))
       this.cache.addLocation({ location: { id: measurement.locationId } });
 
@@ -181,14 +189,31 @@ export class InfluxDB3Service {
         },
       });
 
-    const p = Point.measurement(this.table)
-      .setTag("id", measurement.id)
-      .setTag("sensor_id", measurement.sensorId)
-      .setTag("location_id", measurement.locationId)
-      .setTag("unit", measurement.unit)
-      .setFloatField("temp", measurement.temp)
-      .setTimestamp(measurement.time.valueOf());
+    try {
+      this.cache.writeToBuffer({ measurement });
+    } catch (err) {
+      // CacheError thrown if buffer is full
+      if (err instanceof CacheError) {
+        if (this.logger) this.logger.info("Flushing WriteBuffer");
 
-    await this.client.write(p);
+        // get measurements from buffer + flush
+        const measurements = [measurement, ...this.cache.flushBuffer()];
+
+        // convert to points for writing to db
+        const points: Point[] = measurements.map((m) =>
+          Point.measurement(this.table)
+            .setTag("id", m.id)
+            .setTag("sensor_id", m.sensorId)
+            .setTag("location_id", m.locationId)
+            .setTag("unit", m.unit)
+            .setFloatField("temp", m.temp)
+            .setTimestamp(m.time.valueOf()),
+        );
+
+        await this.client.write(points);
+      } else {
+        throw err;
+      }
+    }
   }
 }

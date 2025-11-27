@@ -14,8 +14,7 @@ export const typeDefs = gql`
   }
 
   type Subscription {
-    sensorLatest(sensorId: ID): Measurement!
-    test: String
+    measurementAdded(sensorId: ID): Measurement!
   }
 
   type Measurement {

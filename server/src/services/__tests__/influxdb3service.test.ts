@@ -12,7 +12,7 @@ describe("influxdb3 integration tests", () => {
     database: config.INFLUX_TEST_DATABASE,
     token: "",
   });
-  const cache = new Cache();
+  const cache = new Cache({ bufSize: 0 });
 
   let influxdb3service: InfluxDB3Service;
   let table: string;

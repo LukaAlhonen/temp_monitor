@@ -80,12 +80,11 @@ export type Sensor = {
 
 export type Subscription = {
   __typename?: 'Subscription';
-  sensorLatest: Measurement;
-  test?: Maybe<Scalars['String']['output']>;
+  measurementAdded: Measurement;
 };
 
 
-export type SubscriptionSensorLatestArgs = {
+export type SubscriptionMeasurementAddedArgs = {
   sensorId?: InputMaybe<Scalars['ID']['input']>;
 };
 
@@ -222,8 +221,7 @@ export type SensorResolvers<ContextType = MyContext, ParentType extends Resolver
 };
 
 export type SubscriptionResolvers<ContextType = MyContext, ParentType extends ResolversParentTypes['Subscription'] = ResolversParentTypes['Subscription']> = {
-  sensorLatest?: SubscriptionResolver<ResolversTypes['Measurement'], "sensorLatest", ParentType, ContextType, Partial<SubscriptionSensorLatestArgs>>;
-  test?: SubscriptionResolver<Maybe<ResolversTypes['String']>, "test", ParentType, ContextType>;
+  measurementAdded?: SubscriptionResolver<ResolversTypes['Measurement'], "measurementAdded", ParentType, ContextType, Partial<SubscriptionMeasurementAddedArgs>>;
 };
 
 export type Resolvers<ContextType = MyContext> = {

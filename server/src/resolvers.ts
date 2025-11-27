@@ -1,5 +1,7 @@
+import { withFilter } from "graphql-subscriptions";
 import { type Resolvers } from "./__generated__/types.js";
 import { pubsub } from "./pubsub.js";
+import type { MeasurementModel } from "./models.js";
 
 export const resolvers: Resolvers = {
   Query: {
@@ -35,8 +37,18 @@ export const resolvers: Resolvers = {
   },
 
   Subscription: {
-    sensorLatest: {
-      subscribe: () => pubsub.asyncIterableIterator(["MEASUREMENT_ADDED"]),
+    measurementAdded: {
+      subscribe: (_, __, ___, ____) =>
+        withFilter<
+          { measurementAdded: MeasurementModel },
+          { sensorId?: string | null }
+        >(
+          () => pubsub.asyncIterator("MEASUREMENT_ADDED"),
+          (payload, variables) => {
+            if (!variables?.sensorId) return true;
+            return payload?.measurementAdded.sensorId === variables?.sensorId;
+          },
+        )(),
     },
   },
 
