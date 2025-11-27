@@ -12,11 +12,13 @@ export const resolvers: Resolvers = {
       return measurement;
     },
 
-    measurements: (_, { sensorId, locationId }, { services }) => {
-      return services.influxdb3service.getMeasurements({
+    measurements: async (_, { sensorId, locationId }, { services }) => {
+      const result = await services.influxdb3service.getMeasurements({
         sensorId,
         locationId,
       });
+
+      return result;
     },
 
     sensor: (_, { id }, { services }) => {

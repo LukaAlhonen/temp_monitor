@@ -197,7 +197,7 @@ export class InfluxDB3Service {
         if (this.logger) this.logger.info("Flushing WriteBuffer");
 
         // get measurements from buffer + flush
-        const measurements = [measurement, ...this.cache.flushBuffer()];
+        const measurements = [...this.cache.flushBuffer(), measurement];
 
         // convert to points for writing to db
         const points: Point[] = measurements.map((m) =>
@@ -207,7 +207,7 @@ export class InfluxDB3Service {
             .setTag("location_id", m.locationId)
             .setTag("unit", m.unit)
             .setFloatField("temp", m.temp)
-            .setTimestamp(m.time.valueOf()),
+            .setTimestamp(m.time),
         );
 
         await this.client.write(points);

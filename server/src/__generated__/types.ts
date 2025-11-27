@@ -31,7 +31,7 @@ export type Measurement = {
   location: Location;
   sensor: Sensor;
   temp: Scalars['Float']['output'];
-  time: Scalars['Date']['output'];
+  time: Scalars['Int']['output'];
   unit: Scalars['String']['output'];
 };
 
@@ -165,6 +165,7 @@ export type ResolversTypes = {
   Date: ResolverTypeWrapper<Scalars['Date']['output']>;
   Float: ResolverTypeWrapper<Scalars['Float']['output']>;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
+  Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   Location: ResolverTypeWrapper<LocationModel>;
   Measurement: ResolverTypeWrapper<MeasurementModel>;
   Query: ResolverTypeWrapper<Record<PropertyKey, never>>;
@@ -179,6 +180,7 @@ export type ResolversParentTypes = {
   Date: Scalars['Date']['output'];
   Float: Scalars['Float']['output'];
   ID: Scalars['ID']['output'];
+  Int: Scalars['Int']['output'];
   Location: LocationModel;
   Measurement: MeasurementModel;
   Query: Record<PropertyKey, never>;
@@ -201,7 +203,7 @@ export type MeasurementResolvers<ContextType = MyContext, ParentType extends Res
   location?: Resolver<ResolversTypes['Location'], ParentType, ContextType>;
   sensor?: Resolver<ResolversTypes['Sensor'], ParentType, ContextType>;
   temp?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-  time?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
+  time?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   unit?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 

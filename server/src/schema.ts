@@ -19,7 +19,7 @@ export const typeDefs = gql`
 
   type Measurement {
     id: ID!
-    time: Date!
+    time: Int!
     temp: Float!
     unit: String!
     sensor: Sensor!

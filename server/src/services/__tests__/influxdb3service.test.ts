@@ -140,7 +140,7 @@ describe("influxdb3 integration tests", () => {
   test("Writes a measurement to the db", async () => {
     const measurement: MeasurementModel = {
       id: "m_10",
-      time: new Date(),
+      time: Date.now(),
       sensorId: "s_10",
       locationId: "l_10",
       unit: "C",

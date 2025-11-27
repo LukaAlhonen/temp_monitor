@@ -40,7 +40,6 @@ impl TemperatureMeasurement {
     // Convert measurement into mqtt payload
     pub fn into_payload(&self) -> Result<String, Error> {
         let payload = to_string(&self)?;
-        println!("{}", payload);
         Ok(payload)
     }
 }

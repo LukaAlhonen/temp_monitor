@@ -42,7 +42,7 @@ const startApolloServer = async () => {
   const services = createServices({
     influxdbClient,
     cache,
-    table: "temp_readings",
+    table: "readings",
     logger,
   });
 

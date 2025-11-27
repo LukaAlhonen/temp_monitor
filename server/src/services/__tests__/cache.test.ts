@@ -43,8 +43,8 @@ describe("cache unit tests", () => {
 
     cache.initSensors({ sensors });
 
-    const sensor1 = cache.getSensor({ id: sensors[0].id });
-    const sensor2 = cache.getSensor({ id: sensors[1].id });
+    const sensor1 = cache.getSensor({ id: "sensor_01" });
+    const sensor2 = cache.getSensor({ id: "sensor_02" });
 
     expect(sensor1).toStrictEqual(sensors[0]);
     expect(sensor2).toStrictEqual(sensors[1]);
@@ -63,8 +63,8 @@ describe("cache unit tests", () => {
 
     cache.initLocations({ locations });
 
-    const location1 = cache.getLocation({ id: locations[0].id });
-    const location2 = cache.getLocation({ id: locations[1].id });
+    const location1 = cache.getLocation({ id: "location_01" });
+    const location2 = cache.getLocation({ id: "location_02" });
 
     expect(location1).toStrictEqual(locations[0]);
     expect(location2).toStrictEqual(locations[1]);
