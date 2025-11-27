@@ -38,6 +38,11 @@ export class InfluxDB3Service {
 
   // get specific measurement object by id
   async getMeasurement({ id }: { id: string }) {
+    // try from cache before querying db
+    let cached = this.cache.getMeasurement({ id });
+
+    if (cached) return cached;
+
     const query = `
       SELECT *
       FROM "${this.table}"
@@ -67,7 +72,10 @@ export class InfluxDB3Service {
     sensorId?: string | null | undefined;
     locationId?: string | null | undefined;
   } = {}) {
-    let filter =
+    // get cached measurements
+    const cached = this.cache.getMeasurements();
+
+    const filter =
       sensorId && locationId
         ? `WHERE sensor_id = '${sensorId}' AND location_id = '${locationId}'`
         : locationId
@@ -76,7 +84,7 @@ export class InfluxDB3Service {
             ? `WHERE sensor_id = '${sensorId}'`
             : "";
 
-    let query = `
+    const query = `
       SELECT *
       FROM "${this.table}"
       ${filter}
@@ -89,11 +97,16 @@ export class InfluxDB3Service {
       measurements.push(parseRawMeasurement(row));
     }
 
-    return measurements;
+    return [...measurements, ...cached];
   }
 
   // get a sensor by id
   async getSensor({ id }: { id: string }) {
+    // try from cache before querying db
+    const cached = this.cache.getSensor({ id });
+
+    if (cached) return cached;
+
     const query = `
       SELECT sensor_id,location_id
       FROM "${this.table}"
@@ -139,6 +152,11 @@ export class InfluxDB3Service {
   }
 
   async getLocation({ id }: { id: string }) {
+    // try cache before querying
+    const cached = this.cache.getLocation({ id });
+
+    if (cached) return cached;
+
     let query = `
       SELECT location_id
       FROM "${this.table}"
