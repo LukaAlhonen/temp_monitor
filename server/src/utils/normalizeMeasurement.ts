@@ -8,7 +8,7 @@ export const normalizeMeasurement = ({
 }): MeasurementModel => {
   return {
     id: jsonPayload.id,
-    time: jsonPayload.time,
+    time: new Date(jsonPayload.time),
     unit: jsonPayload.unit,
     sensorId: jsonPayload.sensor_id,
     locationId: jsonPayload.location_id,

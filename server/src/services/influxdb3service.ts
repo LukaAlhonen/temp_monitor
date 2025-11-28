@@ -88,13 +88,15 @@ export class InfluxDB3Service {
       SELECT *
       FROM "${this.table}"
       ${filter}
+      ORDER BY time DESC
     `;
 
     const result = this.client.query(query);
     const measurements: MeasurementModel[] = [];
 
     for await (const row of result) {
-      measurements.push(parseRawMeasurement(row));
+      const measurement = parseRawMeasurement(row);
+      measurements.push(measurement);
     }
 
     return [...measurements, ...cached];

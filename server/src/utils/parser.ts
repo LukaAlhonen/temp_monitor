@@ -9,7 +9,20 @@ const isString = (input: unknown): input is string => {
 };
 
 const isNumber = (input: unknown): input is number => {
-  return typeof input === "number" && Number.isFinite(input);
+  return (
+    typeof ((input as number) * 1_000_000) === "number" &&
+    Number.isFinite((input as number) * 1_000_000)
+  );
+};
+
+const isDate = (input: unknown): input is number => {
+  const timestamp: number = isString(input)
+    ? Number(input)
+    : isNumber(input)
+      ? input
+      : NaN;
+
+  return Number.isFinite(timestamp) && !isNaN(new Date(timestamp).getTime());
 };
 
 const parseString = (input: unknown): string => {
@@ -19,7 +32,12 @@ const parseString = (input: unknown): string => {
 
 const parseNumber = (input: unknown): number => {
   if (!isNumber(input)) throw new Error(`Unable to parse '${input}' as number`);
-  return input;
+  return input * 1_000_000;
+};
+
+const parseDate = (input: unknown): Date => {
+  if (!isDate(input)) throw new Error(`Unable to parse '${input}' as date`);
+  return new Date(input);
 };
 
 export const parseRawMeasurement = (
@@ -27,7 +45,7 @@ export const parseRawMeasurement = (
 ): MeasurementModel => {
   return {
     id: parseString(raw["id"]),
-    time: parseNumber(raw["time"]),
+    time: parseDate(raw["time"]),
     unit: parseString(raw["unit"]),
     sensorId: parseString(raw["sensor_id"]),
     locationId: parseString(raw["location_id"]),

@@ -1,6 +1,6 @@
 export type MeasurementModel = {
   id: string;
-  time: number;
+  time: Date;
   temp: number;
   unit: string;
   sensorId: string;

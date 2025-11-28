@@ -15,6 +15,8 @@ export class Cache {
     this.sensors = new Map<string, SensorModel>();
     this.locations = new Map<string, LocationModel>();
     this.writeBuffer = new Map<string, MeasurementModel>();
+    if (bufSize > 10_000)
+      throw new CacheError("Write buffer size cannot exceed 10_000");
     this.bufSize = bufSize;
   }
 
@@ -75,7 +77,7 @@ export class Cache {
       result = Array.from(this.writeBuffer.values());
     }
 
-    return result;
+    return result.reverse();
   }
 
   writeToBuffer({ measurement }: { measurement: MeasurementModel }) {
