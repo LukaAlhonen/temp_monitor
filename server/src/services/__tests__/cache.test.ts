@@ -222,4 +222,234 @@ describe("cache unit tests", () => {
   test("Creates cache with buffersize exceeding the 10_000 limit, throwing an error", () => {
     expect(() => new Cache({ bufSize: 100_000 })).toThrow(CacheError);
   });
+
+  test("Queries measurements from cache by sensorId", () => {
+    const cache = new Cache({ bufSize: 4 });
+    const measurements: MeasurementModel[] = [
+      {
+        id: "m_01",
+        sensorId: "s_01",
+        locationId: "l_01",
+        temp: 30.1,
+        unit: "C",
+        time: new Date(),
+      },
+      {
+        id: "m_02",
+        sensorId: "s_01",
+        locationId: "l_01",
+        temp: 30.1,
+        unit: "C",
+        time: new Date(),
+      },
+      {
+        id: "m_03",
+        sensorId: "s_02",
+        locationId: "l_02",
+        temp: 30.1,
+        unit: "C",
+        time: new Date(),
+      },
+      {
+        id: "m_04",
+        sensorId: "s_02",
+        locationId: "l_02",
+        temp: 30.1,
+        unit: "C",
+        time: new Date(),
+      },
+    ];
+
+    for (const measurement of measurements) {
+      cache.writeToBuffer({ measurement });
+    }
+
+    const result = cache.getMeasurements({ sensorId: "s_01" });
+    expect(result).toHaveLength(2);
+    for (const measurement of result) {
+      expect(measurement.sensorId).toBe("s_01");
+    }
+  });
+
+  test("Queries measurements from cache by locationId", () => {
+    const cache = new Cache({ bufSize: 4 });
+    const measurements: MeasurementModel[] = [
+      {
+        id: "m_01",
+        sensorId: "s_01",
+        locationId: "l_01",
+        temp: 30.1,
+        unit: "C",
+        time: new Date(),
+      },
+      {
+        id: "m_02",
+        sensorId: "s_01",
+        locationId: "l_01",
+        temp: 30.1,
+        unit: "C",
+        time: new Date(),
+      },
+      {
+        id: "m_03",
+        sensorId: "s_02",
+        locationId: "l_02",
+        temp: 30.1,
+        unit: "C",
+        time: new Date(),
+      },
+      {
+        id: "m_04",
+        sensorId: "s_02",
+        locationId: "l_02",
+        temp: 30.1,
+        unit: "C",
+        time: new Date(),
+      },
+    ];
+
+    for (const measurement of measurements) {
+      cache.writeToBuffer({ measurement });
+    }
+
+    const result = cache.getMeasurements({ locationId: "l_02" });
+    expect(result).toHaveLength(2);
+    for (const measurement of result) {
+      expect(measurement.locationId).toBe("l_02");
+    }
+  });
+
+  test("Queries latest measurement from writeBuffer", () => {
+    const cache = new Cache({ bufSize: 4 });
+    const measurements: MeasurementModel[] = [
+      {
+        id: "m_01",
+        sensorId: "s_01",
+        locationId: "l_01",
+        temp: 30.1,
+        unit: "C",
+        time: new Date(),
+      },
+      {
+        id: "m_02",
+        sensorId: "s_01",
+        locationId: "l_01",
+        temp: 30.1,
+        unit: "C",
+        time: new Date(),
+      },
+      {
+        id: "m_03",
+        sensorId: "s_02",
+        locationId: "l_02",
+        temp: 30.1,
+        unit: "C",
+        time: new Date(),
+      },
+      {
+        id: "m_04",
+        sensorId: "s_02",
+        locationId: "l_02",
+        temp: 30.1,
+        unit: "C",
+        time: new Date(),
+      },
+    ];
+
+    for (const measurement of measurements) {
+      cache.writeToBuffer({ measurement });
+    }
+
+    const result = cache.getLatestMeasurement();
+    expect(result?.id).toBe("m_04");
+  });
+
+  test("Queries latest measurement from writeBuffer by sensorId", () => {
+    const cache = new Cache({ bufSize: 4 });
+    const measurements: MeasurementModel[] = [
+      {
+        id: "m_01",
+        sensorId: "s_01",
+        locationId: "l_01",
+        temp: 30.1,
+        unit: "C",
+        time: new Date(),
+      },
+      {
+        id: "m_02",
+        sensorId: "s_01",
+        locationId: "l_01",
+        temp: 30.1,
+        unit: "C",
+        time: new Date(),
+      },
+      {
+        id: "m_03",
+        sensorId: "s_02",
+        locationId: "l_02",
+        temp: 30.1,
+        unit: "C",
+        time: new Date(),
+      },
+      {
+        id: "m_04",
+        sensorId: "s_02",
+        locationId: "l_02",
+        temp: 30.1,
+        unit: "C",
+        time: new Date(),
+      },
+    ];
+
+    for (const measurement of measurements) {
+      cache.writeToBuffer({ measurement });
+    }
+
+    const result = cache.getLatestMeasurement({ sensorId: "s_01" });
+    expect(result?.id).toBe("m_02");
+  });
+
+  test("Fails to query latest measurement from writeBuffer with invalid sensorId", () => {
+    const cache = new Cache({ bufSize: 4 });
+    const measurements: MeasurementModel[] = [
+      {
+        id: "m_01",
+        sensorId: "s_01",
+        locationId: "l_01",
+        temp: 30.1,
+        unit: "C",
+        time: new Date(),
+      },
+      {
+        id: "m_02",
+        sensorId: "s_01",
+        locationId: "l_01",
+        temp: 30.1,
+        unit: "C",
+        time: new Date(),
+      },
+      {
+        id: "m_03",
+        sensorId: "s_02",
+        locationId: "l_02",
+        temp: 30.1,
+        unit: "C",
+        time: new Date(),
+      },
+      {
+        id: "m_04",
+        sensorId: "s_02",
+        locationId: "l_02",
+        temp: 30.1,
+        unit: "C",
+        time: new Date(),
+      },
+    ];
+
+    for (const measurement of measurements) {
+      cache.writeToBuffer({ measurement });
+    }
+
+    expect(cache.getLatestMeasurement({ sensorId: "NaN" })).toBeUndefined();
+  });
 });

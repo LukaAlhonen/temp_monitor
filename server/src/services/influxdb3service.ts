@@ -12,6 +12,7 @@ import {
 import type { Cache } from "./cache.js";
 import { CacheError } from "../types/cacheError.js";
 import type { FastifyBaseLogger } from "fastify";
+import { InfluxError } from "../types/influxError.js";
 
 export class InfluxDB3Service {
   private client: InfluxDBClient;
@@ -34,6 +35,35 @@ export class InfluxDB3Service {
     this.cache = cache;
     this.table = table;
     this.logger = logger;
+  }
+
+  async getLatestMeasurement({ sensorId }: { sensorId?: string } = {}) {
+    let cached = this.cache.getLatestMeasurement({ sensorId });
+
+    if (cached) return cached;
+
+    const filter = sensorId ? `WHERE sensor_id = '${sensorId}'` : "";
+
+    const query = `
+      SELECT *
+      FROM "${this.table}"
+      ${filter}
+      ORDER BY time DESC
+      LIMIT 1
+    `;
+
+    let measurement: MeasurementModel | null = null;
+    const result = this.client.query(query);
+
+    for await (const row of result) {
+      measurement = parseRawMeasurement(row);
+    }
+
+    if (measurement === null) {
+      throw new InfluxError("Could not find latest measurement");
+    }
+
+    return measurement;
   }
 
   // get specific measurement object by id
@@ -59,7 +89,7 @@ export class InfluxDB3Service {
     }
 
     if (measurement === null)
-      throw new Error(`Could not find Measurement with id: ${id}`);
+      throw new InfluxError(`Could not find Measurement with id: ${id}`);
 
     return measurement;
   }
@@ -124,7 +154,7 @@ export class InfluxDB3Service {
     }
 
     if (sensor === null)
-      throw new Error(`Could not find Sensor with id: ${id}`);
+      throw new InfluxError(`Could not find Sensor with id: ${id}`);
 
     return sensor;
   }
@@ -145,9 +175,16 @@ export class InfluxDB3Service {
 
     const result = this.client.query(query);
     const sensors: SensorModel[] = [];
+    const seen: Set<string> = new Set<string>(); // track sensors
 
     for await (const row of result) {
-      sensors.push(parseRawSensor(row));
+      const sensor = parseRawSensor(row);
+      const key = `${sensor.locationId}:${sensor.id}`;
+      // only push unique sensors
+      if (!seen.has(key)) {
+        seen.add(key);
+        sensors.push(sensor);
+      }
     }
 
     return sensors;
@@ -174,7 +211,7 @@ export class InfluxDB3Service {
     }
 
     if (location === null)
-      throw new Error(`Could not find Location with id: ${id}`);
+      throw new InfluxError(`Could not find Location with id: ${id}`);
 
     return location;
   }
@@ -187,9 +224,14 @@ export class InfluxDB3Service {
 
     const result = this.client.query(query);
     const locations: LocationModel[] = [];
+    const seen: Set<string> = new Set<string>(); // track locations
 
     for await (const row of result) {
-      locations.push(parseRawLocation(row));
+      const location = parseRawLocation(row);
+      if (!seen.has(location.id)) {
+        seen.add(location.id);
+        locations.push(location); // only push unique locations
+      }
     }
 
     return locations;

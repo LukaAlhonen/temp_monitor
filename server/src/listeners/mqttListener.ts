@@ -1,6 +1,6 @@
 import mqtt, { MqttClient } from "mqtt";
 import { normalizeMeasurement } from "../utils/normalizeMeasurement.js";
-import type { InfluxDB3Service } from "../services/influxdb3service.js";
+import type { InfluxDB3Service } from "../services/influxDB3Service.js";
 import { TypedPubSub, type Events } from "../pubsub.js";
 
 export class MqttListener {

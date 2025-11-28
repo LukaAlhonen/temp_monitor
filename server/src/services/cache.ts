@@ -52,6 +52,18 @@ export class Cache {
     return this.writeBuffer.get(id);
   }
 
+  getLatestMeasurement({ sensorId }: { sensorId?: string | undefined } = {}):
+    | MeasurementModel
+    | undefined {
+    const cached: MeasurementModel[] = sensorId
+      ? Array.from(
+          this.writeBuffer.values().filter((m) => m.sensorId === sensorId),
+        )
+      : Array.from(this.writeBuffer.values());
+
+    return cached[cached.length - 1];
+  }
+
   getMeasurements({
     locationId,
     sensorId,

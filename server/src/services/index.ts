@@ -1,6 +1,6 @@
 import type { FastifyBaseLogger } from "fastify";
 import type { Cache } from "./cache.js";
-import { InfluxDB3Service } from "./influxdb3service.js";
+import { InfluxDB3Service } from "./influxDB3Service.js";
 import type { InfluxDBClient } from "@influxdata/influxdb3-client";
 
 export type Services = {
