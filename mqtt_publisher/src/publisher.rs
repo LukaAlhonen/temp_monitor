@@ -38,7 +38,8 @@ impl Publisher {
         });
 
         // create sensor
-        let sensor = Sensor::new();
+        let mut sensor = Sensor::new();
+        sensor._seed(10.0);
 
         Publisher {
             client: client,

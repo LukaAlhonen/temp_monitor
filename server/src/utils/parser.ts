@@ -32,7 +32,7 @@ const parseString = (input: unknown): string => {
 
 const parseNumber = (input: unknown): number => {
   if (!isNumber(input)) throw new Error(`Unable to parse '${input}' as number`);
-  return input * 1_000_000;
+  return input;
 };
 
 const parseDate = (input: unknown): Date => {

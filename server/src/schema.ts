@@ -5,6 +5,7 @@ import { gql } from "graphql-tag";
 export const typeDefs = gql`
   scalar Date
   type Query {
+    latestMeasurement(sensorId: ID): Measurement!
     measurements(sensorId: ID, locationId: ID): [Measurement!]!
     measurement(id: ID!): Measurement!
     sensor(id: ID!): Sensor!
@@ -14,7 +15,7 @@ export const typeDefs = gql`
   }
 
   type Subscription {
-    measurementAdded(sensorId: ID): Measurement!
+    measurementAdded(sensorId: ID, locationId: ID): Measurement!
   }
 
   type Measurement {
@@ -30,6 +31,7 @@ export const typeDefs = gql`
     id: ID!
     location: Location!
     measurements: [Measurement!]!
+    latestMeasurement: Measurement!
   }
 
   type Location {

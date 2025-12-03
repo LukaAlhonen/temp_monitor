@@ -11,6 +11,7 @@ import { OperationTypeNode } from "graphql";
 
 const link = new HttpLink({
   uri: "http://localhost:4000/graphql",
+  // credentials: "include",
 });
 
 const wsLink = new GraphQLWsLink(

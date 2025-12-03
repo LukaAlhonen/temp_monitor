@@ -18,7 +18,7 @@ impl Sensor {
     // read from sensor
     pub fn read(&mut self) -> f32 {
         let mut rng = rand::rng();
-        let value = &self.seed + rng.random_range(-0.3..0.3);
+        let value = &self.seed + rng.random_range(-1.0..1.0);
         self.seed = value;
         value
     }

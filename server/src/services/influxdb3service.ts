@@ -37,7 +37,9 @@ export class InfluxDB3Service {
     this.logger = logger;
   }
 
-  async getLatestMeasurement({ sensorId }: { sensorId?: string } = {}) {
+  async getLatestMeasurement({
+    sensorId,
+  }: { sensorId?: string | null | undefined } = {}) {
     let cached = this.cache.getLatestMeasurement({ sensorId });
 
     if (cached) return cached;
@@ -165,6 +167,7 @@ export class InfluxDB3Service {
   }: {
     locationId?: string | undefined | null;
   } = {}) {
+    const cached = this.cache.getSensors({ locationId });
     const filter = locationId ? `WHERE location_id = '${locationId}'` : "";
 
     const query = `
@@ -175,7 +178,9 @@ export class InfluxDB3Service {
 
     const result = this.client.query(query);
     const sensors: SensorModel[] = [];
-    const seen: Set<string> = new Set<string>(); // track sensors
+    const seen: Set<string> = new Set<string>(
+      cached.map((sensor) => `${sensor.locationId}:${sensor.id}`),
+    ); // track sensors + add cached sensor ids to set
 
     for await (const row of result) {
       const sensor = parseRawSensor(row);
@@ -187,7 +192,7 @@ export class InfluxDB3Service {
       }
     }
 
-    return sensors;
+    return [...cached, ...sensors];
   }
 
   async getLocation({ id }: { id: string }) {
@@ -216,7 +221,11 @@ export class InfluxDB3Service {
     return location;
   }
 
+  // TODO:
+  // - I'm sure there is a better way to mix the locations from the db and the cached ones,
+  // maybe a nice way to query the locations WHERE location_id !== cached location ids or something
   async getLocations() {
+    const cached = this.cache.getLocations();
     let query = `
       SELECT location_id
       FROM "${this.table}"
@@ -224,7 +233,9 @@ export class InfluxDB3Service {
 
     const result = this.client.query(query);
     const locations: LocationModel[] = [];
-    const seen: Set<string> = new Set<string>(); // track locations
+    const seen: Set<string> = new Set<string>(
+      cached.map((location) => location.id),
+    ); // track locations
 
     for await (const row of result) {
       const location = parseRawLocation(row);
@@ -234,22 +245,24 @@ export class InfluxDB3Service {
       }
     }
 
-    return locations;
+    return [...cached, ...locations];
   }
 
   // write a new measurement to db
   async writeMeasurement({ measurement }: { measurement: MeasurementModel }) {
     // cache location and sensor if not already done
-    if (!this.cache.getLocation({ id: measurement.locationId }))
+    if (!this.cache.getLocation({ id: measurement.locationId })) {
       this.cache.addLocation({ location: { id: measurement.locationId } });
+    }
 
-    if (!this.cache.getSensor({ id: measurement.sensorId }))
+    if (!this.cache.getSensor({ id: measurement.sensorId })) {
       this.cache.addSensor({
         sensor: {
           id: measurement.sensorId,
           locationId: measurement.locationId,
         },
       });
+    }
 
     try {
       this.cache.writeToBuffer({ measurement });

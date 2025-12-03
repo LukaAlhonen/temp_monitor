@@ -33,12 +33,18 @@ export type Measurement = {
 
 export type Query = {
   __typename: 'Query';
+  latestMeasurement: Measurement;
   location: Location;
   locations: Array<Location>;
   measurement: Measurement;
   measurements: Array<Measurement>;
   sensor: Sensor;
   sensors: Array<Sensor>;
+};
+
+
+export type QueryLatestMeasurementArgs = {
+  sensorId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -70,6 +76,7 @@ export type QuerySensorsArgs = {
 export type Sensor = {
   __typename: 'Sensor';
   id: Scalars['ID']['output'];
+  latestMeasurement: Measurement;
   location: Location;
   measurements: Array<Measurement>;
 };
@@ -81,10 +88,32 @@ export type Subscription = {
 
 
 export type SubscriptionMeasurementAddedArgs = {
+  locationId?: InputMaybe<Scalars['ID']['input']>;
   sensorId?: InputMaybe<Scalars['ID']['input']>;
 };
 
-export type GetMeasurementsQueryVariables = Exact<{ [key: string]: never; }>;
+export type LocationDetailFragmentFragment = { __typename: 'Location', id: string, sensors: Array<{ __typename: 'Sensor', id: string, latestMeasurement: { __typename: 'Measurement', id: string, temp: number, unit: string, time: unknown }, location: { __typename: 'Location', id: string } }> };
+
+export type LocationOverviewFragmentFragment = { __typename: 'Location', id: string, sensors: Array<{ __typename: 'Sensor', id: string }> };
+
+export type SensorFragmentFragment = { __typename: 'Sensor', id: string, latestMeasurement: { __typename: 'Measurement', id: string, temp: number, unit: string, time: unknown }, location: { __typename: 'Location', id: string } };
+
+export type MeasurementAddedSubscriptionVariables = Exact<{
+  sensorId?: InputMaybe<Scalars['ID']['input']>;
+  locationId?: InputMaybe<Scalars['ID']['input']>;
+}>;
 
 
-export type GetMeasurementsQuery = { measurements: Array<{ __typename: 'Measurement', id: string, temp: number }> };
+export type MeasurementAddedSubscription = { measurementAdded: { __typename: 'Measurement', id: string, temp: number, time: unknown, unit: string, location: { __typename: 'Location', id: string }, sensor: { __typename: 'Sensor', id: string } } };
+
+export type GetLocationQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetLocationQuery = { location: { __typename: 'Location', id: string, sensors: Array<{ __typename: 'Sensor', id: string, latestMeasurement: { __typename: 'Measurement', id: string, temp: number, unit: string, time: unknown }, location: { __typename: 'Location', id: string } }> } };
+
+export type GetLocationsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetLocationsQuery = { locations: Array<{ __typename: 'Location', id: string, sensors: Array<{ __typename: 'Sensor', id: string }> }> };

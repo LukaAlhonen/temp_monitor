@@ -14,6 +14,7 @@ import { Cache } from "./services/cache.js";
 import { MqttListener } from "./listeners/mqttListener.js";
 import { pubsub } from "./pubsub.js";
 import type { Disposable } from "graphql-ws";
+import cors from "@fastify/cors";
 
 let wsCleanup: Disposable;
 let mqttListener: MqttListener;
@@ -33,7 +34,7 @@ const startApolloServer = async () => {
 
   await apolloServer.start();
 
-  const cache = new Cache({ bufSize: 100 });
+  const cache = new Cache({ bufSize: 10 });
   influxdbClient = new InfluxDBClient({
     host: config.INFLUX_HOST,
     database: config.INFLUX_DATABASE,
@@ -61,6 +62,10 @@ const startApolloServer = async () => {
 
   await fastify.register(fastifyApollo(apolloServer), {
     context: myContextFunction,
+  });
+
+  await fastify.register(cors, {
+    origin: "*",
   });
 
   fastify.addHook("onReady", async () => {

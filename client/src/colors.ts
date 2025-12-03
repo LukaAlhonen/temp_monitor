@@ -1,0 +1,23 @@
+export const colors = {
+  mainGreen: "#83ad95",
+  darkGray: "#3f3f3f",
+  lightGray: "#d1d1d1",
+  eggShellWhite: "#dce2dc",
+  dGreen1: "#596869",
+  dGreen2: "#6c8976",
+  lGreen1: "#abd1b5",
+  lGreen2: "#79b791",
+  white: "#e6efe6",
+  dBlue: "#2f83ef",
+  blue: "#599bf2",
+  bg: "#1c2326",
+  bg2: "#1c1e26",
+  bg3: "#0d1011",
+  bg4: "#151a1c",
+  bg5: "#222a2d",
+  status: {
+    okay: "#0c6b37",
+    warning: "#f8b324",
+    danger: "#eb442c",
+  },
+};

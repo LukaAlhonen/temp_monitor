@@ -14,10 +14,20 @@ import type { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 type Documents = {
-    "\n  query GetMeasurements {\n      measurements {\n          id\n          temp\n      }\n  }\n": typeof types.GetMeasurementsDocument,
+    "\n  fragment LocationDetailFragment on Location {\n      id\n      sensors {\n          id\n          ...SensorFragment\n      }\n  }\n": typeof types.LocationDetailFragmentFragmentDoc,
+    "\n  fragment LocationOverviewFragment on Location {\n      id\n      sensors {\n          id\n      }\n  }\n": typeof types.LocationOverviewFragmentFragmentDoc,
+    "\n  fragment SensorFragment on Sensor {\n      id\n      latestMeasurement {\n          id\n          temp\n          unit\n          time\n      }\n      location {\n          id\n      }\n  }\n": typeof types.SensorFragmentFragmentDoc,
+    "\n  subscription MeasurementAdded($sensorId: ID $locationId: ID) {\n    measurementAdded(sensorId: $sensorId locationId: $locationId) {\n      id\n      temp\n      time\n      unit\n      location {\n          id\n      }\n      sensor {\n          id\n      }\n    }\n  }\n": typeof types.MeasurementAddedDocument,
+    "\n  query GetLocation($id: ID!) {\n      location(id: $id) {\n          id\n          ...LocationDetailFragment\n      }\n  }\n": typeof types.GetLocationDocument,
+    "\n  query GetLocations {\n      locations {\n          id\n          ...LocationOverviewFragment\n      }\n  }\n": typeof types.GetLocationsDocument,
 };
 const documents: Documents = {
-    "\n  query GetMeasurements {\n      measurements {\n          id\n          temp\n      }\n  }\n": types.GetMeasurementsDocument,
+    "\n  fragment LocationDetailFragment on Location {\n      id\n      sensors {\n          id\n          ...SensorFragment\n      }\n  }\n": types.LocationDetailFragmentFragmentDoc,
+    "\n  fragment LocationOverviewFragment on Location {\n      id\n      sensors {\n          id\n      }\n  }\n": types.LocationOverviewFragmentFragmentDoc,
+    "\n  fragment SensorFragment on Sensor {\n      id\n      latestMeasurement {\n          id\n          temp\n          unit\n          time\n      }\n      location {\n          id\n      }\n  }\n": types.SensorFragmentFragmentDoc,
+    "\n  subscription MeasurementAdded($sensorId: ID $locationId: ID) {\n    measurementAdded(sensorId: $sensorId locationId: $locationId) {\n      id\n      temp\n      time\n      unit\n      location {\n          id\n      }\n      sensor {\n          id\n      }\n    }\n  }\n": types.MeasurementAddedDocument,
+    "\n  query GetLocation($id: ID!) {\n      location(id: $id) {\n          id\n          ...LocationDetailFragment\n      }\n  }\n": types.GetLocationDocument,
+    "\n  query GetLocations {\n      locations {\n          id\n          ...LocationOverviewFragment\n      }\n  }\n": types.GetLocationsDocument,
 };
 
 /**
@@ -37,7 +47,27 @@ export function gql(source: string): unknown;
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n  query GetMeasurements {\n      measurements {\n          id\n          temp\n      }\n  }\n"): (typeof documents)["\n  query GetMeasurements {\n      measurements {\n          id\n          temp\n      }\n  }\n"];
+export function gql(source: "\n  fragment LocationDetailFragment on Location {\n      id\n      sensors {\n          id\n          ...SensorFragment\n      }\n  }\n"): (typeof documents)["\n  fragment LocationDetailFragment on Location {\n      id\n      sensors {\n          id\n          ...SensorFragment\n      }\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n  fragment LocationOverviewFragment on Location {\n      id\n      sensors {\n          id\n      }\n  }\n"): (typeof documents)["\n  fragment LocationOverviewFragment on Location {\n      id\n      sensors {\n          id\n      }\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n  fragment SensorFragment on Sensor {\n      id\n      latestMeasurement {\n          id\n          temp\n          unit\n          time\n      }\n      location {\n          id\n      }\n  }\n"): (typeof documents)["\n  fragment SensorFragment on Sensor {\n      id\n      latestMeasurement {\n          id\n          temp\n          unit\n          time\n      }\n      location {\n          id\n      }\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n  subscription MeasurementAdded($sensorId: ID $locationId: ID) {\n    measurementAdded(sensorId: $sensorId locationId: $locationId) {\n      id\n      temp\n      time\n      unit\n      location {\n          id\n      }\n      sensor {\n          id\n      }\n    }\n  }\n"): (typeof documents)["\n  subscription MeasurementAdded($sensorId: ID $locationId: ID) {\n    measurementAdded(sensorId: $sensorId locationId: $locationId) {\n      id\n      temp\n      time\n      unit\n      location {\n          id\n      }\n      sensor {\n          id\n      }\n    }\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n  query GetLocation($id: ID!) {\n      location(id: $id) {\n          id\n          ...LocationDetailFragment\n      }\n  }\n"): (typeof documents)["\n  query GetLocation($id: ID!) {\n      location(id: $id) {\n          id\n          ...LocationDetailFragment\n      }\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n  query GetLocations {\n      locations {\n          id\n          ...LocationOverviewFragment\n      }\n  }\n"): (typeof documents)["\n  query GetLocations {\n      locations {\n          id\n          ...LocationOverviewFragment\n      }\n  }\n"];
 
 export function gql(source: string) {
   return (documents as any)[source] ?? {};

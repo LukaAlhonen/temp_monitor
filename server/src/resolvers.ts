@@ -5,6 +5,13 @@ import type { MeasurementModel } from "./models.js";
 
 export const resolvers: Resolvers = {
   Query: {
+    latestMeasurement: async (_, { sensorId }, { services }) => {
+      const measurement = await services.influxdb3service.getLatestMeasurement({
+        sensorId,
+      });
+
+      return measurement;
+    },
     measurement: async (_, { id }, { services }) => {
       const measurement = await services.influxdb3service.getMeasurement({
         id,
@@ -40,15 +47,24 @@ export const resolvers: Resolvers = {
 
   Subscription: {
     measurementAdded: {
-      subscribe: (_, __, ___, ____) =>
-        withFilter<
-          { measurementAdded: MeasurementModel },
-          { sensorId?: string | null }
-        >(
+      subscribe: (_, { sensorId, locationId }, ___, ____) =>
+        withFilter<{ measurementAdded: MeasurementModel }>(
+          // { sensorId?: string | null; locationId?: string | null }
           () => pubsub.asyncIterator("MEASUREMENT_ADDED"),
-          (payload, variables) => {
-            if (!variables?.sensorId) return true;
-            return payload?.measurementAdded.sensorId === variables?.sensorId;
+          (payload) => {
+            if (!sensorId && !locationId) {
+              console.log("hello");
+              return true;
+            } else if (!sensorId) {
+              return payload?.measurementAdded.locationId === locationId;
+            } else if (!locationId) {
+              return payload?.measurementAdded.sensorId === sensorId;
+            } else {
+              return (
+                payload?.measurementAdded.sensorId === sensorId &&
+                payload?.measurementAdded.locationId === locationId
+              );
+            }
           },
         )(),
     },
@@ -69,6 +85,9 @@ export const resolvers: Resolvers = {
     },
     measurements: ({ id }, _, { services }) => {
       return services.influxdb3service.getMeasurements({ sensorId: id });
+    },
+    latestMeasurement: ({ id }, _, { services }) => {
+      return services.influxdb3service.getLatestMeasurement({ sensorId: id });
     },
   },
 

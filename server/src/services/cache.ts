@@ -44,15 +44,32 @@ export class Cache {
     return this.sensors.get(id);
   }
 
+  getSensors({
+    locationId,
+  }: { locationId?: string | undefined | null } = {}): SensorModel[] {
+    let sensors: SensorModel[] = Array.from(this.sensors.values());
+    if (locationId) {
+      sensors = sensors.filter((sensor) => sensor.locationId === locationId);
+    }
+    // return Array.from(this.sensors.values());
+    return sensors;
+  }
+
   getLocation({ id }: { id: string }): LocationModel | undefined {
     return this.locations.get(id);
+  }
+
+  getLocations(): LocationModel[] {
+    return Array.from(this.locations.values());
   }
 
   getMeasurement({ id }: { id: string }): MeasurementModel | undefined {
     return this.writeBuffer.get(id);
   }
 
-  getLatestMeasurement({ sensorId }: { sensorId?: string | undefined } = {}):
+  getLatestMeasurement({
+    sensorId,
+  }: { sensorId?: string | undefined | null } = {}):
     | MeasurementModel
     | undefined {
     const cached: MeasurementModel[] = sensorId

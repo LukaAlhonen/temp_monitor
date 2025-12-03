@@ -3,16 +3,14 @@ import { CodegenConfig } from "@graphql-codegen/cli";
 const config: CodegenConfig = {
   overwrite: true,
   schema: "http://localhost:4000/graphql",
-  // This assumes that all your source files are in a top-level `src/` directory - you might need to adjust this to your file structure
-  documents: ["src/**/*.{ts,tsx}"],
-  // Don't exit with non-zero status when there are no documents
   ignoreNoDocuments: true,
+  documents: ["./src/**/*.{ts,tsx,graphql}"],
   generates: {
-    // Use a path that works the best for the structure of your application
     "./src/__generated__/": {
       preset: "client",
       presetConfig: {
         gqlTagName: "gql",
+        // fragmentMasking: false,
       },
       config: {
         useTypeImports: true,

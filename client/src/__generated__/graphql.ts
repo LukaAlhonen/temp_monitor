@@ -35,12 +35,18 @@ export type Measurement = {
 
 export type Query = {
   __typename?: 'Query';
+  latestMeasurement: Measurement;
   location: Location;
   locations: Array<Location>;
   measurement: Measurement;
   measurements: Array<Measurement>;
   sensor: Sensor;
   sensors: Array<Sensor>;
+};
+
+
+export type QueryLatestMeasurementArgs = {
+  sensorId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -72,6 +78,7 @@ export type QuerySensorsArgs = {
 export type Sensor = {
   __typename?: 'Sensor';
   id: Scalars['ID']['output'];
+  latestMeasurement: Measurement;
   location: Location;
   measurements: Array<Measurement>;
 };
@@ -83,13 +90,48 @@ export type Subscription = {
 
 
 export type SubscriptionMeasurementAddedArgs = {
+  locationId?: InputMaybe<Scalars['ID']['input']>;
   sensorId?: InputMaybe<Scalars['ID']['input']>;
 };
 
-export type GetMeasurementsQueryVariables = Exact<{ [key: string]: never; }>;
+export type LocationDetailFragmentFragment = { __typename?: 'Location', id: string, sensors: Array<(
+    { __typename?: 'Sensor', id: string }
+    & { ' $fragmentRefs'?: { 'SensorFragmentFragment': SensorFragmentFragment } }
+  )> } & { ' $fragmentName'?: 'LocationDetailFragmentFragment' };
+
+export type LocationOverviewFragmentFragment = { __typename?: 'Location', id: string, sensors: Array<{ __typename?: 'Sensor', id: string }> } & { ' $fragmentName'?: 'LocationOverviewFragmentFragment' };
+
+export type SensorFragmentFragment = { __typename?: 'Sensor', id: string, latestMeasurement: { __typename?: 'Measurement', id: string, temp: number, unit: string, time: any }, location: { __typename?: 'Location', id: string } } & { ' $fragmentName'?: 'SensorFragmentFragment' };
+
+export type MeasurementAddedSubscriptionVariables = Exact<{
+  sensorId?: InputMaybe<Scalars['ID']['input']>;
+  locationId?: InputMaybe<Scalars['ID']['input']>;
+}>;
 
 
-export type GetMeasurementsQuery = { __typename?: 'Query', measurements: Array<{ __typename?: 'Measurement', id: string, temp: number }> };
+export type MeasurementAddedSubscription = { __typename?: 'Subscription', measurementAdded: { __typename?: 'Measurement', id: string, temp: number, time: any, unit: string, location: { __typename?: 'Location', id: string }, sensor: { __typename?: 'Sensor', id: string } } };
+
+export type GetLocationQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
 
 
-export const GetMeasurementsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetMeasurements"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"measurements"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"temp"}}]}}]}}]} as unknown as DocumentNode<GetMeasurementsQuery, GetMeasurementsQueryVariables>;
+export type GetLocationQuery = { __typename?: 'Query', location: (
+    { __typename?: 'Location', id: string }
+    & { ' $fragmentRefs'?: { 'LocationDetailFragmentFragment': LocationDetailFragmentFragment } }
+  ) };
+
+export type GetLocationsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetLocationsQuery = { __typename?: 'Query', locations: Array<(
+    { __typename?: 'Location', id: string }
+    & { ' $fragmentRefs'?: { 'LocationOverviewFragmentFragment': LocationOverviewFragmentFragment } }
+  )> };
+
+export const SensorFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"SensorFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Sensor"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"latestMeasurement"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"temp"}},{"kind":"Field","name":{"kind":"Name","value":"unit"}},{"kind":"Field","name":{"kind":"Name","value":"time"}}]}},{"kind":"Field","name":{"kind":"Name","value":"location"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<SensorFragmentFragment, unknown>;
+export const LocationDetailFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"LocationDetailFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Location"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"sensors"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"SensorFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"SensorFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Sensor"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"latestMeasurement"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"temp"}},{"kind":"Field","name":{"kind":"Name","value":"unit"}},{"kind":"Field","name":{"kind":"Name","value":"time"}}]}},{"kind":"Field","name":{"kind":"Name","value":"location"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<LocationDetailFragmentFragment, unknown>;
+export const LocationOverviewFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"LocationOverviewFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Location"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"sensors"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<LocationOverviewFragmentFragment, unknown>;
+export const MeasurementAddedDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"MeasurementAdded"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"sensorId"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"locationId"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"measurementAdded"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sensorId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"sensorId"}}},{"kind":"Argument","name":{"kind":"Name","value":"locationId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"locationId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"temp"}},{"kind":"Field","name":{"kind":"Name","value":"time"}},{"kind":"Field","name":{"kind":"Name","value":"unit"}},{"kind":"Field","name":{"kind":"Name","value":"location"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"sensor"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]}}]} as unknown as DocumentNode<MeasurementAddedSubscription, MeasurementAddedSubscriptionVariables>;
+export const GetLocationDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetLocation"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"location"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"LocationDetailFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"SensorFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Sensor"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"latestMeasurement"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"temp"}},{"kind":"Field","name":{"kind":"Name","value":"unit"}},{"kind":"Field","name":{"kind":"Name","value":"time"}}]}},{"kind":"Field","name":{"kind":"Name","value":"location"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"LocationDetailFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Location"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"sensors"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"SensorFragment"}}]}}]}}]} as unknown as DocumentNode<GetLocationQuery, GetLocationQueryVariables>;
+export const GetLocationsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetLocations"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locations"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"LocationOverviewFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"LocationOverviewFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Location"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"sensors"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<GetLocationsQuery, GetLocationsQueryVariables>;
