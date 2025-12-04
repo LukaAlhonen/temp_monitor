@@ -11,7 +11,9 @@ const PageHeader = (props: PageHeaderProps) => {
   return (
     <PageHeaderContainer>
       <Left>{props.left}</Left>
-      <h1>{props.title}</h1>
+      <Title>
+        <h1>{props.title}</h1>
+      </Title>
       <Right>{props.right}</Right>
     </PageHeaderContainer>
   );
@@ -27,14 +29,7 @@ const PageHeaderContainer = styled.div({
   borderBottom: `0.10rem solid ${colors.darkGray}`,
   alignItems: "center",
   color: colors.white,
-  "& h1": {
-    position: "absolute",
-    left: "50%",
-    transform: "translateX(-50%)",
-    textTransform: "uppercase",
-    padding: 0,
-    margin: 0,
-  },
+  justifyContent: "space-between",
 });
 
 const Left = styled.div({
@@ -44,9 +39,28 @@ const Left = styled.div({
   justifyContent: "flex-start",
 });
 
+const Title = styled.div({
+  overflow: "hidden",
+  maxWidth: "40rem",
+  "@media(max-width: 769px)": {
+    display: "none",
+  },
+  "& h1": {
+    textTransform: "uppercase",
+    padding: 0,
+    margin: 0,
+    textOverflow: "ellipsis",
+    textWrap: "nowrap",
+    overflow: "hidden",
+  },
+});
+
 const Right = styled.div({
   flex: 1,
   display: "flex",
   alignItems: "center",
   justifyContent: "flex-end",
+  "@media(max-width: 1000px)": {
+    display: "none",
+  },
 });

@@ -49,9 +49,7 @@ const startApolloServer = async () => {
 
   // load sensor and location objects from influxdb into cache
   const sensors = await services.influxdb3service.getSensors();
-  const locations = await services.influxdb3service.getLocations();
 
-  cache.initLocations({ locations });
   cache.initSensors({ sensors });
 
   const myContextFunction: ApolloFastifyContextFunction<

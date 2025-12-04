@@ -6,6 +6,8 @@ import type {
   GetLocationQueryVariables,
 } from "../../__generated__/graphql";
 import { LocationDetail } from "../../components/LocationDetail";
+import { Layout } from "../../components/Layout";
+import HeaderLink from "../../components/HeaderLink/header-link";
 
 const Location = () => {
   const { locationId = "" } = useParams<{ locationId: string }>();
@@ -20,9 +22,12 @@ const Location = () => {
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
   return (
-    <>
+    <Layout
+      headerLeft={<HeaderLink path="/" text="Locations" icon="arrow-left" />}
+      headerTitle={locationId}
+    >
       <LocationDetail location={data?.location} />
-    </>
+    </Layout>
   );
 };
 

@@ -15,6 +15,11 @@ export type Scalars = {
   Date: { input: unknown; output: unknown; }
 };
 
+export type Interval = {
+  days?: InputMaybe<Scalars['Int']['input']>;
+  hours?: InputMaybe<Scalars['Int']['input']>;
+};
+
 export type Location = {
   __typename: 'Location';
   id: Scalars['ID']['output'];
@@ -31,13 +36,21 @@ export type Measurement = {
   unit: Scalars['String']['output'];
 };
 
+export type MeasurementsInfo = {
+  __typename: 'MeasurementsInfo';
+  avg: Scalars['Float']['output'];
+  max: Scalars['Float']['output'];
+  measurements: Array<Measurement>;
+  min: Scalars['Float']['output'];
+};
+
 export type Query = {
   __typename: 'Query';
   latestMeasurement: Measurement;
   location: Location;
   locations: Array<Location>;
   measurement: Measurement;
-  measurements: Array<Measurement>;
+  measurements: MeasurementsInfo;
   sensor: Sensor;
   sensors: Array<Sensor>;
 };
@@ -59,13 +72,15 @@ export type QueryMeasurementArgs = {
 
 
 export type QueryMeasurementsArgs = {
+  interval?: InputMaybe<Interval>;
   locationId?: InputMaybe<Scalars['ID']['input']>;
   sensorId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
 export type QuerySensorArgs = {
-  id: Scalars['ID']['input'];
+  locationId: Scalars['ID']['input'];
+  sensorId: Scalars['ID']['input'];
 };
 
 
@@ -78,7 +93,12 @@ export type Sensor = {
   id: Scalars['ID']['output'];
   latestMeasurement: Measurement;
   location: Location;
-  measurements: Array<Measurement>;
+  measurements: MeasurementsInfo;
+};
+
+
+export type SensorMeasurementsArgs = {
+  interval?: InputMaybe<Interval>;
 };
 
 export type Subscription = {
@@ -95,6 +115,15 @@ export type SubscriptionMeasurementAddedArgs = {
 export type LocationDetailFragmentFragment = { __typename: 'Location', id: string, sensors: Array<{ __typename: 'Sensor', id: string, latestMeasurement: { __typename: 'Measurement', id: string, temp: number, unit: string, time: unknown }, location: { __typename: 'Location', id: string } }> };
 
 export type LocationOverviewFragmentFragment = { __typename: 'Location', id: string, sensors: Array<{ __typename: 'Sensor', id: string }> };
+
+export type GetMeasurementsQueryVariables = Exact<{
+  sensorId: Scalars['ID']['input'];
+  locationId: Scalars['ID']['input'];
+  interval?: InputMaybe<Interval>;
+}>;
+
+
+export type GetMeasurementsQuery = { measurements: { __typename: 'MeasurementsInfo', avg: number, min: number, max: number } };
 
 export type SensorFragmentFragment = { __typename: 'Sensor', id: string, latestMeasurement: { __typename: 'Measurement', id: string, temp: number, unit: string, time: unknown }, location: { __typename: 'Location', id: string } };
 
@@ -117,3 +146,11 @@ export type GetLocationsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetLocationsQuery = { locations: Array<{ __typename: 'Location', id: string, sensors: Array<{ __typename: 'Sensor', id: string }> }> };
+
+export type GetSensorQueryVariables = Exact<{
+  sensorId: Scalars['ID']['input'];
+  locationId: Scalars['ID']['input'];
+}>;
+
+
+export type GetSensorQuery = { sensor: { __typename: 'Sensor', id: string, latestMeasurement: { __typename: 'Measurement', id: string, temp: number, unit: string, time: unknown }, location: { __typename: 'Location', id: string } } };

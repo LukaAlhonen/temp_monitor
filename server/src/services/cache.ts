@@ -6,61 +6,75 @@ import type {
 import { CacheError } from "../types/cacheError.js";
 
 export class Cache {
-  private sensors: Map<string, SensorModel>;
-  private locations: Map<string, LocationModel>;
+  private locations: Map<string, Map<string, SensorModel>>;
   private writeBuffer: Map<string, MeasurementModel>;
   private bufSize: number;
 
   constructor({ bufSize = 100 }: { bufSize?: number } = {}) {
-    this.sensors = new Map<string, SensorModel>();
-    this.locations = new Map<string, LocationModel>();
+    this.locations = new Map<string, Map<string, SensorModel>>();
     this.writeBuffer = new Map<string, MeasurementModel>();
     if (bufSize > 10_000)
-      throw new CacheError("Write buffer size cannot exceed 10_000");
+      throw new CacheError("Write buffer size cannot exceed 10000");
     this.bufSize = bufSize;
   }
 
   initSensors({ sensors }: { sensors: SensorModel[] }) {
     sensors.forEach((sensor) => {
-      this.sensors.set(sensor.id, sensor);
-    });
-  }
-
-  initLocations({ locations }: { locations: LocationModel[] }) {
-    locations.forEach((location) => {
-      this.locations.set(location.id, location);
+      this.addSensor({ sensor });
     });
   }
 
   addSensor({ sensor }: { sensor: SensorModel }) {
-    this.sensors.set(sensor.id, sensor);
+    const location = this.locations.get(sensor.locationId);
+    if (!location) {
+      this.locations.set(
+        sensor.locationId,
+        new Map<string, SensorModel>([[sensor.id, sensor]]),
+      );
+    } else {
+      if (!location.has(sensor.id)) location.set(sensor.id, sensor);
+    }
   }
 
   addLocation({ location }: { location: LocationModel }) {
-    this.locations.set(location.id, location);
+    if (!this.locations.has(location.id))
+      this.locations.set(location.id, new Map<string, SensorModel>());
   }
 
-  getSensor({ id }: { id: string }): SensorModel | undefined {
-    return this.sensors.get(id);
+  getSensor({
+    locationId,
+    sensorId,
+  }: {
+    locationId: string;
+    sensorId: string;
+  }): SensorModel | undefined {
+    return this.locations.get(locationId)?.get(sensorId);
   }
 
   getSensors({
     locationId,
   }: { locationId?: string | undefined | null } = {}): SensorModel[] {
-    let sensors: SensorModel[] = Array.from(this.sensors.values());
-    if (locationId) {
-      sensors = sensors.filter((sensor) => sensor.locationId === locationId);
+    let sensors: SensorModel[] = [];
+    if (!locationId) {
+      for (const sensorMap of this.locations.values()) {
+        sensors.push(...sensorMap.values());
+      }
+    } else {
+      const sensorMap = this.locations.get(locationId);
+      if (sensorMap) sensors.push(...sensorMap.values());
     }
-    // return Array.from(this.sensors.values());
+
     return sensors;
   }
 
   getLocation({ id }: { id: string }): LocationModel | undefined {
-    return this.locations.get(id);
+    const location = this.locations.get(id);
+    if (location) return { id: id };
+    return undefined;
   }
 
   getLocations(): LocationModel[] {
-    return Array.from(this.locations.values());
+    return Array.from(this.locations.keys().map((id) => ({ id: id })));
   }
 
   getMeasurement({ id }: { id: string }): MeasurementModel | undefined {
@@ -84,7 +98,10 @@ export class Cache {
   getMeasurements({
     locationId,
     sensorId,
-  }: { locationId?: string; sensorId?: string } = {}): MeasurementModel[] {
+  }: {
+    locationId?: string | null | undefined;
+    sensorId?: string | null | undefined;
+  } = {}): MeasurementModel[] {
     let result: MeasurementModel[];
     if (locationId && sensorId) {
       result = Array.from(

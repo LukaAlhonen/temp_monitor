@@ -19,17 +19,21 @@ export const resolvers: Resolvers = {
       return measurement;
     },
 
-    measurements: async (_, { sensorId, locationId }, { services }) => {
-      const result = await services.influxdb3service.getMeasurements({
+    measurements: async (
+      _,
+      { sensorId, locationId, interval },
+      { services },
+    ) => {
+      const measurements = await services.influxdb3service.getMeasurementsInfo({
         sensorId,
         locationId,
+        interval,
       });
-
-      return result;
+      return measurements;
     },
 
-    sensor: (_, { id }, { services }) => {
-      return services.influxdb3service.getSensor({ id });
+    sensor: (_, { sensorId, locationId }, { services }) => {
+      return services.influxdb3service.getSensor({ sensorId, locationId });
     },
 
     sensors: (_, { locationId }, { services }) => {
@@ -71,8 +75,8 @@ export const resolvers: Resolvers = {
   },
 
   Measurement: {
-    sensor: ({ sensorId }, _, { services }) => {
-      return services.influxdb3service.getSensor({ id: sensorId });
+    sensor: ({ sensorId, locationId }, _, { services }) => {
+      return services.influxdb3service.getSensor({ sensorId, locationId });
     },
     location: ({ locationId }, _, { services }) => {
       return services.influxdb3service.getLocation({ id: locationId });
@@ -83,8 +87,12 @@ export const resolvers: Resolvers = {
     location: ({ locationId }, _, { services }) => {
       return services.influxdb3service.getLocation({ id: locationId });
     },
-    measurements: ({ id }, _, { services }) => {
-      return services.influxdb3service.getMeasurements({ sensorId: id });
+    measurements: ({ id, locationId }, { interval }, { services }) => {
+      return services.influxdb3service.getMeasurementsInfo({
+        locationId,
+        sensorId: id,
+        interval,
+      });
     },
     latestMeasurement: ({ id }, _, { services }) => {
       return services.influxdb3service.getLatestMeasurement({ sensorId: id });

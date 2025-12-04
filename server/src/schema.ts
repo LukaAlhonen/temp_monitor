@@ -6,12 +6,21 @@ export const typeDefs = gql`
   scalar Date
   type Query {
     latestMeasurement(sensorId: ID): Measurement!
-    measurements(sensorId: ID, locationId: ID): [Measurement!]!
+    measurements(
+      sensorId: ID
+      locationId: ID
+      interval: Interval
+    ): MeasurementsInfo!
     measurement(id: ID!): Measurement!
-    sensor(id: ID!): Sensor!
+    sensor(locationId: ID!, sensorId: ID!): Sensor!
     sensors(locationId: ID): [Sensor!]!
     location(id: ID!): Location!
     locations: [Location!]!
+  }
+
+  input Interval {
+    hours: Int
+    days: Int
   }
 
   type Subscription {
@@ -30,13 +39,20 @@ export const typeDefs = gql`
   type Sensor {
     id: ID!
     location: Location!
-    measurements: [Measurement!]!
+    measurements(interval: Interval): MeasurementsInfo!
     latestMeasurement: Measurement!
   }
 
   type Location {
     id: ID!
     sensors: [Sensor!]!
+  }
+
+  type MeasurementsInfo {
+    measurements: [Measurement!]!
+    avg: Float!
+    max: Float!
+    min: Float!
   }
 `;
 

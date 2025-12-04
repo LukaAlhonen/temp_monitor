@@ -101,16 +101,19 @@ describe("influxdb3 integration tests", () => {
   });
 
   test("Queries a sensor", async () => {
-    const result = await influxdb3service.getSensor({ id: "s_01" });
+    const result = await influxdb3service.getSensor({
+      sensorId: "s_01",
+      locationId: "l_01",
+    });
 
     expect(result.id).toBe("s_01");
     expect(result.locationId).toBeDefined();
   });
 
   test("Queries a sensors with invalid id", async () => {
-    await expect(influxdb3service.getSensor({ id: "NaN" })).rejects.toThrow(
-      InfluxError,
-    );
+    await expect(
+      influxdb3service.getSensor({ sensorId: "NaN", locationId: "NaN" }),
+    ).rejects.toThrow(InfluxError);
   });
 
   test("Queries all sensors", async () => {

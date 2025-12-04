@@ -8,6 +8,7 @@ export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: 
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
 export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
 export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
+export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 export type RequireFields<T, K extends keyof T> = Omit<T, K> & { [P in K]-?: NonNullable<T[P]> };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
@@ -17,6 +18,11 @@ export type Scalars = {
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
   Date: { input: any; output: any; }
+};
+
+export type Interval = {
+  days?: InputMaybe<Scalars['Int']['input']>;
+  hours?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type Location = {
@@ -35,13 +41,21 @@ export type Measurement = {
   unit: Scalars['String']['output'];
 };
 
+export type MeasurementsInfo = {
+  __typename?: 'MeasurementsInfo';
+  avg: Scalars['Float']['output'];
+  max: Scalars['Float']['output'];
+  measurements: Array<Measurement>;
+  min: Scalars['Float']['output'];
+};
+
 export type Query = {
   __typename?: 'Query';
   latestMeasurement: Measurement;
   location: Location;
   locations: Array<Location>;
   measurement: Measurement;
-  measurements: Array<Measurement>;
+  measurements: MeasurementsInfo;
   sensor: Sensor;
   sensors: Array<Sensor>;
 };
@@ -63,13 +77,15 @@ export type QueryMeasurementArgs = {
 
 
 export type QueryMeasurementsArgs = {
+  interval?: InputMaybe<Interval>;
   locationId?: InputMaybe<Scalars['ID']['input']>;
   sensorId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
 export type QuerySensorArgs = {
-  id: Scalars['ID']['input'];
+  locationId: Scalars['ID']['input'];
+  sensorId: Scalars['ID']['input'];
 };
 
 
@@ -82,7 +98,12 @@ export type Sensor = {
   id: Scalars['ID']['output'];
   latestMeasurement: Measurement;
   location: Location;
-  measurements: Array<Measurement>;
+  measurements: MeasurementsInfo;
+};
+
+
+export type SensorMeasurementsArgs = {
+  interval?: InputMaybe<Interval>;
 };
 
 export type Subscription = {
@@ -173,8 +194,11 @@ export type ResolversTypes = {
   Date: ResolverTypeWrapper<Scalars['Date']['output']>;
   Float: ResolverTypeWrapper<Scalars['Float']['output']>;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
+  Int: ResolverTypeWrapper<Scalars['Int']['output']>;
+  Interval: Interval;
   Location: ResolverTypeWrapper<LocationModel>;
   Measurement: ResolverTypeWrapper<MeasurementModel>;
+  MeasurementsInfo: ResolverTypeWrapper<Omit<MeasurementsInfo, 'measurements'> & { measurements: Array<ResolversTypes['Measurement']> }>;
   Query: ResolverTypeWrapper<Record<PropertyKey, never>>;
   Sensor: ResolverTypeWrapper<SensorModel>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
@@ -187,8 +211,11 @@ export type ResolversParentTypes = {
   Date: Scalars['Date']['output'];
   Float: Scalars['Float']['output'];
   ID: Scalars['ID']['output'];
+  Int: Scalars['Int']['output'];
+  Interval: Interval;
   Location: LocationModel;
   Measurement: MeasurementModel;
+  MeasurementsInfo: Omit<MeasurementsInfo, 'measurements'> & { measurements: Array<ResolversParentTypes['Measurement']> };
   Query: Record<PropertyKey, never>;
   Sensor: SensorModel;
   String: Scalars['String']['output'];
@@ -213,13 +240,20 @@ export type MeasurementResolvers<ContextType = MyContext, ParentType extends Res
   unit?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
+export type MeasurementsInfoResolvers<ContextType = MyContext, ParentType extends ResolversParentTypes['MeasurementsInfo'] = ResolversParentTypes['MeasurementsInfo']> = {
+  avg?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  max?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  measurements?: Resolver<Array<ResolversTypes['Measurement']>, ParentType, ContextType>;
+  min?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+};
+
 export type QueryResolvers<ContextType = MyContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   latestMeasurement?: Resolver<ResolversTypes['Measurement'], ParentType, ContextType, Partial<QueryLatestMeasurementArgs>>;
   location?: Resolver<ResolversTypes['Location'], ParentType, ContextType, RequireFields<QueryLocationArgs, 'id'>>;
   locations?: Resolver<Array<ResolversTypes['Location']>, ParentType, ContextType>;
   measurement?: Resolver<ResolversTypes['Measurement'], ParentType, ContextType, RequireFields<QueryMeasurementArgs, 'id'>>;
-  measurements?: Resolver<Array<ResolversTypes['Measurement']>, ParentType, ContextType, Partial<QueryMeasurementsArgs>>;
-  sensor?: Resolver<ResolversTypes['Sensor'], ParentType, ContextType, RequireFields<QuerySensorArgs, 'id'>>;
+  measurements?: Resolver<ResolversTypes['MeasurementsInfo'], ParentType, ContextType, Partial<QueryMeasurementsArgs>>;
+  sensor?: Resolver<ResolversTypes['Sensor'], ParentType, ContextType, RequireFields<QuerySensorArgs, 'locationId' | 'sensorId'>>;
   sensors?: Resolver<Array<ResolversTypes['Sensor']>, ParentType, ContextType, Partial<QuerySensorsArgs>>;
 };
 
@@ -227,7 +261,7 @@ export type SensorResolvers<ContextType = MyContext, ParentType extends Resolver
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   latestMeasurement?: Resolver<ResolversTypes['Measurement'], ParentType, ContextType>;
   location?: Resolver<ResolversTypes['Location'], ParentType, ContextType>;
-  measurements?: Resolver<Array<ResolversTypes['Measurement']>, ParentType, ContextType>;
+  measurements?: Resolver<ResolversTypes['MeasurementsInfo'], ParentType, ContextType, Partial<SensorMeasurementsArgs>>;
 };
 
 export type SubscriptionResolvers<ContextType = MyContext, ParentType extends ResolversParentTypes['Subscription'] = ResolversParentTypes['Subscription']> = {
@@ -238,6 +272,7 @@ export type Resolvers<ContextType = MyContext> = {
   Date?: GraphQLScalarType;
   Location?: LocationResolvers<ContextType>;
   Measurement?: MeasurementResolvers<ContextType>;
+  MeasurementsInfo?: MeasurementsInfoResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   Sensor?: SensorResolvers<ContextType>;
   Subscription?: SubscriptionResolvers<ContextType>;

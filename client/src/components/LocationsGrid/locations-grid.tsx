@@ -2,8 +2,6 @@ import styled from "@emotion/styled";
 import type { GetLocationsQuery } from "../../__generated__/graphql";
 import { LocationOverview } from "../LocationOverview";
 import { colors } from "../../colors";
-import { PageHeader } from "../PageHeader";
-import { Layout } from "../Layout";
 
 interface LocationsGridProps {
   locations?: GetLocationsQuery["locations"];
@@ -11,13 +9,11 @@ interface LocationsGridProps {
 
 const LocationsGrid = (props: LocationsGridProps) => {
   return (
-    <Layout headerTitle="Locations">
-      <LocationsGridContainer>
-        {props.locations?.map((location) => (
-          <LocationOverview key={location.id} location={location} />
-        ))}
-      </LocationsGridContainer>
-    </Layout>
+    <LocationsGridContainer>
+      {props.locations?.map((location) => (
+        <LocationOverview key={location.id} location={location} />
+      ))}
+    </LocationsGridContainer>
   );
 };
 

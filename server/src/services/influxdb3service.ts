@@ -13,6 +13,8 @@ import type { Cache } from "./cache.js";
 import { CacheError } from "../types/cacheError.js";
 import type { FastifyBaseLogger } from "fastify";
 import { InfluxError } from "../types/influxError.js";
+import type { MeasurementWhereArgs } from "../types/measurementWhereArgs.js";
+import type { Interval } from "../__generated__/types.js";
 
 export class InfluxDB3Service {
   private client: InfluxDBClient;
@@ -35,6 +37,33 @@ export class InfluxDB3Service {
     this.cache = cache;
     this.table = table;
     this.logger = logger;
+  }
+
+  private buildMeasurementFilter({
+    args,
+  }: {
+    args: MeasurementWhereArgs;
+  }): string {
+    const filterArray = [];
+
+    if (args.interval?.days && args.interval.days > 0) {
+      filterArray.push(
+        `time > now() - INTERVAL '${args.interval.days} ${args.interval.days > 1 ? "DAYS" : "DAY"}'`,
+      );
+    } else if (args.interval?.hours) {
+      filterArray.push(
+        `time > now() - INTERVAL '${args.interval.hours} ${args.interval.hours > 1 ? "HOURS" : "HOUR"}'`,
+      );
+    }
+
+    if (args.sensorId) filterArray.push(`sensor_id = '${args.sensorId}'`);
+    if (args.locationId) filterArray.push(`location_id = '${args.locationId}'`);
+
+    if (filterArray.length < 1) return "";
+
+    const filter = `WHERE ${filterArray.join(" AND ")}`;
+
+    return filter;
   }
 
   async getLatestMeasurement({
@@ -100,21 +129,18 @@ export class InfluxDB3Service {
   async getMeasurements({
     sensorId,
     locationId,
+    interval,
   }: {
     sensorId?: string | null | undefined;
     locationId?: string | null | undefined;
+    interval?: Interval | null | undefined;
   } = {}) {
     // get cached measurements
-    const cached = this.cache.getMeasurements();
+    const cached = this.cache.getMeasurements({ sensorId, locationId });
 
-    const filter =
-      sensorId && locationId
-        ? `WHERE sensor_id = '${sensorId}' AND location_id = '${locationId}'`
-        : locationId
-          ? `WHERE location_id = '${locationId}'`
-          : sensorId
-            ? `WHERE sensor_id = '${sensorId}'`
-            : "";
+    const filter = this.buildMeasurementFilter({
+      args: { sensorId, locationId, interval },
+    });
 
     const query = `
       SELECT *
@@ -128,23 +154,65 @@ export class InfluxDB3Service {
 
     for await (const row of result) {
       const measurement = parseRawMeasurement(row);
+      console.log(measurement.sensorId);
       measurements.push(measurement);
     }
 
-    return [...measurements, ...cached];
+    return [...cached, ...measurements];
+  }
+
+  async getMeasurementsInfo({
+    sensorId,
+    locationId,
+    interval,
+  }: {
+    sensorId?: string | null | undefined;
+    locationId?: string | null | undefined;
+    interval?: Interval | null | undefined;
+  } = {}): Promise<{
+    avg: number;
+    min: number;
+    max: number;
+    measurements: MeasurementModel[];
+  }> {
+    const measurements = await this.getMeasurements({
+      sensorId,
+      locationId,
+      interval,
+    });
+    const temps = measurements.flatMap((measurement) => measurement.temp);
+    const avg =
+      temps.length > 0 ? temps.reduce((a, b) => a + b) / temps.length : 0;
+    const min = temps.length > 0 ? Math.min(...temps) : 0;
+    const max = temps.length > 0 ? Math.max(...temps) : 0;
+
+    const result = {
+      measurements,
+      avg,
+      min,
+      max,
+    };
+
+    return result;
   }
 
   // get a sensor by id
-  async getSensor({ id }: { id: string }) {
+  async getSensor({
+    locationId,
+    sensorId,
+  }: {
+    locationId: string;
+    sensorId: string;
+  }) {
     // try from cache before querying db
-    const cached = this.cache.getSensor({ id });
+    const cached = this.cache.getSensor({ locationId, sensorId });
 
     if (cached) return cached;
 
     const query = `
       SELECT sensor_id,location_id
       FROM "${this.table}"
-      WHERE sensor_id = '${id}'
+      WHERE sensor_id = '${sensorId}' AND location_id = '${locationId}'
       LIMIT 1
     `;
 
@@ -156,7 +224,9 @@ export class InfluxDB3Service {
     }
 
     if (sensor === null)
-      throw new InfluxError(`Could not find Sensor with id: ${id}`);
+      throw new InfluxError(
+        `Location "${locationId}" has no sensor with id: ${sensorId}`,
+      );
 
     return sensor;
   }
@@ -255,7 +325,12 @@ export class InfluxDB3Service {
       this.cache.addLocation({ location: { id: measurement.locationId } });
     }
 
-    if (!this.cache.getSensor({ id: measurement.sensorId })) {
+    if (
+      !this.cache.getSensor({
+        locationId: measurement.locationId,
+        sensorId: measurement.sensorId,
+      })
+    ) {
       this.cache.addSensor({
         sensor: {
           id: measurement.sensorId,
@@ -272,7 +347,7 @@ export class InfluxDB3Service {
         if (this.logger) this.logger.info("Flushing WriteBuffer");
 
         // get measurements from buffer + flush
-        const measurements = [...this.cache.flushBuffer(), measurement];
+        const measurements = [measurement, ...this.cache.flushBuffer()];
 
         // convert to points for writing to db
         const points: Point[] = measurements.map((m) =>

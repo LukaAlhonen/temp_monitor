@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Locations } from "./Locations";
 import { Location } from "./Location";
+import { Sensor } from "./Sensor";
 
 export const Pages = () => {
   return (
@@ -10,7 +11,7 @@ export const Pages = () => {
         <Route path="/location/:locationId" element={<Location />} />
         <Route
           path="/location/:locationId/sensor/:sensorId"
-          element={<div>hello</div>}
+          element={<Sensor />}
         />
       </Routes>
     </BrowserRouter>
