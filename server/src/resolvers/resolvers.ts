@@ -1,7 +1,7 @@
 import { withFilter } from "graphql-subscriptions";
-import { type Resolvers } from "./__generated__/types.js";
-import { pubsub } from "./pubsub.js";
-import type { MeasurementModel } from "./models.js";
+import { type Resolvers } from "../__generated__/types.js";
+import { pubsub } from "../pubsub.js";
+import type { MeasurementModel } from "../models.js";
 
 export const resolvers: Resolvers = {
   Query: {
@@ -57,7 +57,6 @@ export const resolvers: Resolvers = {
           () => pubsub.asyncIterator("MEASUREMENT_ADDED"),
           (payload) => {
             if (!sensorId && !locationId) {
-              console.log("hello");
               return true;
             } else if (!sensorId) {
               return payload?.measurementAdded.locationId === locationId;

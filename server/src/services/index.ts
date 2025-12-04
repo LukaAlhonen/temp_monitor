@@ -1,6 +1,6 @@
 import type { FastifyBaseLogger } from "fastify";
 import type { Cache } from "./cache.js";
-import { InfluxDB3Service } from "./influxDB3Service.js";
+import { InfluxDB3Service } from "./influxdb3service.js";
 import type { InfluxDBClient } from "@influxdata/influxdb3-client";
 
 export type Services = {
@@ -16,7 +16,7 @@ export const createServices = ({
   influxdbClient: InfluxDBClient;
   cache: Cache;
   table: string;
-  logger: FastifyBaseLogger;
+  logger?: FastifyBaseLogger;
 }): Services => {
   return {
     influxdb3service: new InfluxDB3Service({

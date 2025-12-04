@@ -2,7 +2,7 @@ import { describe, test, expect, beforeEach } from "vitest";
 import { InfluxDBClient } from "@influxdata/influxdb3-client";
 import config from "../../config.js";
 import { seed_db } from "../../utils/test/seed_db.js";
-import { InfluxDB3Service } from "../influxDB3Service.js";
+import { InfluxDB3Service } from "../influxdb3service.js";
 import { Cache } from "../cache.js";
 import type { MeasurementModel } from "../../models.js";
 import { InfluxError } from "../../types/influxError.js";

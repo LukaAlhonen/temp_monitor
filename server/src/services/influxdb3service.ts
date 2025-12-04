@@ -31,7 +31,7 @@ export class InfluxDB3Service {
     client: InfluxDBClient;
     cache: Cache;
     table: string;
-    logger?: FastifyBaseLogger;
+    logger?: FastifyBaseLogger | undefined;
   }) {
     this.client = client;
     this.cache = cache;
@@ -154,7 +154,6 @@ export class InfluxDB3Service {
 
     for await (const row of result) {
       const measurement = parseRawMeasurement(row);
-      console.log(measurement.sensorId);
       measurements.push(measurement);
     }
 
@@ -357,7 +356,7 @@ export class InfluxDB3Service {
             .setTag("location_id", m.locationId)
             .setTag("unit", m.unit)
             .setFloatField("temp", m.temp)
-            .setTimestamp(m.time),
+            .setTimestamp(m.time.valueOf() * 1_000_000),
         );
 
         await this.client.write(points);
