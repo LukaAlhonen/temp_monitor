@@ -1,0 +1,76 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+
+name: Node.js CI
+
+on:
+  push:
+    branches: ["main", "dev"]
+  pull_request:
+    branches: ["main", "dev"]
+
+jobs:
+  npm-test:
+    runs-on: ubuntu-latest
+
+    env:
+      INFLUX_TEST_HOST: "http://localhost:8182"
+      INFLUX_TEST_DATABASE: "test"
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Start test influxdb3
+        run: |
+          docker run -d --name test_db -p 8182:8181 influxdb:3-core \
+          influxdb3 serve --without-auth --object-store=memory --node-id=node0
+
+      - name: Test server
+        uses: actions/setup-node@v4
+        with:
+          context: ./server
+          node-version: 24.x
+          cache: "npm"
+      - run: rm -rf package-lock.json node_modules
+      - run: npm install
+      - name: Generate graphql types for server
+        run: npm run generate
+      - name: run tests
+        run: npm test
+
+  npm-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build client and server
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+          cache: "npm"
+      - name: Install server deps
+        run: rm -rf package-lock.json node_modules && npm install
+        working-directory: ./server
+      - name: Generate graphql types for server
+        run: npm run generate
+        working-directory: ./server
+      - name: Build server
+        run: npm run build
+        working-directory: ./server
+      - name: Build client
+        run: npm run build
+        working-directory: ./client

@@ -10,8 +10,8 @@ import { createClient } from "graphql-ws";
 import { OperationTypeNode } from "graphql";
 
 const link = new HttpLink({
-  uri: "http://localhost:4000/graphql",
-  // credentials: "include",
+  // uri: "http://localhost:4000/graphql",
+  uri: "/graphql",
 });
 
 const wsLink = new GraphQLWsLink(
