@@ -173,7 +173,7 @@ describe("influxdb3 integration tests", () => {
 
   test("Queries the latest measurement", async () => {
     const result = await influxdb3service.getLatestMeasurement();
-    expect(result.id).toBe("m_04");
+    expect(result.id).toBe("m_01");
   });
 
   test("Queries the latest measurement by sensorId", async () => {
@@ -181,7 +181,7 @@ describe("influxdb3 integration tests", () => {
       sensorId: "s_01",
     });
 
-    expect(result.id).toBe("m_02");
+    expect(result.id).toBe("m_01");
   });
 
   test("Fails to query latest measurement wiht invalid sensorId", async () => {

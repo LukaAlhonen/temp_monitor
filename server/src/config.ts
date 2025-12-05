@@ -8,6 +8,8 @@ interface ENV {
   INFLUX_TEST_HOST: string | undefined;
   INFLUX_DATABASE: string | undefined;
   INFLUX_TEST_DATABASE: string | undefined;
+  MQTT_BROKER_ADDRESS: string | undefined;
+  MQTT_TOPIC: string | undefined;
 }
 
 interface Config {
@@ -16,6 +18,8 @@ interface Config {
   INFLUX_TEST_HOST: string;
   INFLUX_DATABASE: string;
   INFLUX_TEST_DATABASE: string;
+  MQTT_BROKER_ADDRESS: string;
+  MQTT_TOPIC: string;
 }
 
 const getConfig = (): ENV => {
@@ -25,6 +29,8 @@ const getConfig = (): ENV => {
     INFLUX_TEST_HOST: process.env.INFLUX_TEST_HOST,
     INFLUX_DATABASE: process.env.INFLUX_DATABASE,
     INFLUX_TEST_DATABASE: process.env.INFLUX_TEST_DATABASE,
+    MQTT_BROKER_ADDRESS: process.env.MQTT_BROKER_ADDRESS,
+    MQTT_TOPIC: process.env.MQTT_TOPIC,
   };
 };
 

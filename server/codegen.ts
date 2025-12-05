@@ -20,6 +20,9 @@ const config: CodegenConfig = {
     },
     "./src/__generated__/graphql.ts": {
       plugins: ["typescript-operations", "typescript", "typed-document-node"],
+      config: {
+        useTypeImports: true,
+      },
     },
   },
 };
