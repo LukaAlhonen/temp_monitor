@@ -16,6 +16,11 @@ jobs:
     env:
       INFLUX_TEST_HOST: "http://localhost:8182"
       INFLUX_TEST_DATABASE: "test"
+      INLFUX_TOKEN: "nan"
+      INFLUX_HOST: "nan"
+      INFLUX_DATABASE: "nan"
+      MQTT_BROKER_ADDRESS: "nan"
+      MQTT_TOPIC: "nan"
 
     steps:
       - name: Checkout repository
