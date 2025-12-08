@@ -51,7 +51,6 @@ impl Publisher {
 
     // publish new message to a chosen topic
     pub async fn publish(&self, topic: &str, payload: String) -> Result<(), ClientError> {
-        println!("{:?}", payload);
         self.client
             .publish(topic, QoS::AtLeastOnce, false, payload)
             .await
