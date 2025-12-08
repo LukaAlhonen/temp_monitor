@@ -80,13 +80,11 @@ const startApolloServer = async () => {
       wsServer,
     );
 
-    fastify.log.info(
-      "Websocket server listening on ws://localhost:4000/graphql",
-    );
+    fastify.log.info("Websocket server started");
 
     mqttListener = new MqttListener({
-      url: "mqtt://localhost:1883",
-      topic: "sensors/temp",
+      url: `mqtt://${config.MQTT_BROKER_ADDRESS}`,
+      topic: config.MQTT_TOPIC,
       influxdb3service: services.influxdb3service,
       pubsub,
     });
@@ -99,7 +97,7 @@ const startApolloServer = async () => {
 
   const start = async () => {
     try {
-      await fastify.listen({ port: 4000 });
+      await fastify.listen({ port: 4000, host: "0.0.0.0" });
     } catch (err) {
       fastify.log.error(err);
       process.exit(1);

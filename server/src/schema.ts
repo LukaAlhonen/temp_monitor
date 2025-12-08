@@ -1,5 +1,5 @@
 import { makeExecutableSchema } from "@graphql-tools/schema";
-import { resolvers } from "./resolvers.js";
+import { resolvers } from "./resolvers/resolvers.js";
 import { gql } from "graphql-tag";
 
 export const typeDefs = gql`
